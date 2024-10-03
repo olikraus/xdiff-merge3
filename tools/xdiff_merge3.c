@@ -9,6 +9,8 @@
 #include <ctype.h>
 #include "xdiff.h"
 #include "xtestutils.h"
+#include "xtypes.h"
+#include "xutils.h"
 
 
 
@@ -38,7 +40,7 @@ static void *wrap_realloc(void *priv, void *ptr, unsigned int size) {
 	return realloc(ptr, size);
 }
 
-void setMemoryAllocator() {
+void set_memory_allocator() {
   memallocator_t malt;
   malt.priv = NULL;
   malt.malloc = wrap_malloc;
@@ -47,22 +49,30 @@ void setMemoryAllocator() {
   xdl_set_allocator(&malt);
 }
 
+void print_mmfile(mmfile_t *mmf) {
+	long size;
+	char *blk;
+
+	if ((blk = (char *) xdl_mmfile_first(mmf, &size)) != NULL) {
+		do {
+                  fwrite(blk, size, 1, stdout);
+		} while ((blk = (char *) xdl_mmfile_next(mmf, &size)) != NULL);
+	}
+}
+
+
 
 int main(int argc, char *argv[]) {
-  mmfile_t mfo, mf1, mf2;
+  mmfile_t mfo, mf1, mf2, mfresult;
   xdemitcb_t ecb, rjecb;
 
-  ecb.priv = stdout;
-  ecb.outf = xdlt_outf;
-  rjecb.priv = stderr;
-  rjecb.outf = xdlt_outf;
 
   if (argc < 4) {
           printf("%s mfo mf1 mf2\n", argv[0]);
           return 1;
   }
   
-  setMemoryAllocator();
+  set_memory_allocator();
 
   if (xdlt_load_mmfile(argv[1], &mfo, 0) < 0) {
     perror(argv[1]);
@@ -76,13 +86,34 @@ int main(int argc, char *argv[]) {
     perror(argv[1]);
     return 1;
   }
+  
+  if (xdl_init_mmfile(&mfresult, 8*1024, XDL_MMF_ATOMIC) < 0) {
+          return 1;
+  }  
+
+  ecb.priv = &mfresult;
+  ecb.outf = xdl_mmfile_outf;
+  rjecb.priv = stderr;
+  rjecb.outf = xdlt_outf;
+  
+  puts("\nmerge start");
+  
 
   if ( xdl_merge3(&mfo, &mf1, &mf2, &ecb, &rjecb) < 0 ) {
     printf("xdl_merge3 failed\n");
     return 1;
   }
   
-  puts("Done");
+  puts("\nmreg3 done");
+  
+  puts("\n===mfo");
+  print_mmfile(&mfo);
+  puts("\n===mf1");
+  print_mmfile(&mf1);
+  puts("\n===mf2");
+  print_mmfile(&mf2);
+  puts("\n===mfresult");
+  print_mmfile(&mfresult);
     
   return 0;
 }
