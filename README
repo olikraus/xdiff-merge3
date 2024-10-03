@@ -1,0 +1,16 @@
+
+
+This is a copy of the libxdiff library 0.23 from here: http://www.xmailserver.org/xdiff-lib.html
+
+Modifications:
+ * Removed all autoconf HAVE_ macros
+ * Removed STDC_HEADERS and VERSION macros
+ * Removed several unused statements from config.h
+ * Copied remaining config.h content into xinclude.h (mostly PACKAGE macros)
+ * Removed obsolete xmissing.c and xmissing.h
+ * Forcefully included stdio.h, stdlib.h, unistd.h, string.h and limits.h
+ * New (and simple) Makefile
+  
+Extensions:
+ * xdiff_merge3 example
+ 
