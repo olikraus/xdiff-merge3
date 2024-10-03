@@ -2,7 +2,11 @@ This is a copy of the libxdiff library 0.23 from here: http://www.xmailserver.or
 
 Goal for this github project:
  Implement commandline interface for xdl_merge3() function.
-
+ 
+XDIFF Lib:
+  * URL: http://www.xmailserver.org/xdiff-lib.html
+  * PDF: http://www.xmailserver.org/xdiff.pdf
+ 
 Modifications:
  * Removed all autoconf HAVE_ macros
  * Removed STDC_HEADERS and VERSION macros
